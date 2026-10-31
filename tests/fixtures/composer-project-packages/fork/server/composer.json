@@ -1,0 +1,1 @@
+{"name": "fork/server", "require": {"php": "^8.1", "server/lib": "*"}, "autoload": {"psr-4": {"pocketmine\\": "src/"}}}

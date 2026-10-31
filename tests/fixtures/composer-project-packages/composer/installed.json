@@ -1,0 +1,11 @@
+{
+    "packages": [
+        {"name": "fork/server", "replace": {"pocketmine/pocketmine-mp": "*"}, "install-path": "../fork/server"},
+        {"name": "server/lib", "install-path": "../server/lib"},
+        {"name": "acme/virion", "install-path": "../acme/virion"},
+        {"name": "acme/http", "install-path": "../acme/http"},
+        {"name": "acme/util", "install-path": "../acme/util"},
+        {"name": "acme/provided", "install-path": "../acme/provided"}
+    ],
+    "dev": true
+}

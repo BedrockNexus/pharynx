@@ -1,0 +1,13 @@
+{
+    "name": "example/plugin",
+    "autoload": {"psr-4": {"Example\\Plugin\\": "src/Example/Plugin"}},
+    "require": {
+        "php": "^8.1",
+        "pocketmine/pocketmine-mp": "^5.0.0",
+        "server/lib": "*",
+        "acme/virion": "*",
+        "acme/http": "*",
+        "acme/provided": "*"
+    },
+    "extra": {"pharynx": {"exclude": ["acme/provided"]}}
+}

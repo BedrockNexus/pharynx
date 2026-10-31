@@ -1,0 +1,1 @@
+{"name": "acme/http", "require": {"acme/util": "*", "server/lib": "*"}, "autoload": {"psr-4": {"Http\\": "src/"}}}

@@ -1,0 +1,1 @@
+{"name": "acme/virion", "require": {"pocketmine/pocketmine-mp": "^5.0.0"}, "autoload": {"psr-0": {"Acme\\Virion\\": "src/"}}, "extra": {"virion": {"spec": "3.0", "namespace-root": "Acme\\Virion"}}}
