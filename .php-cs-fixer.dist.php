@@ -12,7 +12,8 @@ return (function() {
         foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__ . "/" . $root)) as $file) {
             $file = realpath($file);
 
-            if(substr($file, -4) === ".php") {
+            // Packages installed for the end-to-end test plugin are not ours to format.
+            if(substr($file, -4) === ".php" && !str_contains(str_replace("\\", "/", $file), "/vendor/")) {
                 $finder->append([$file]);
             }
         }

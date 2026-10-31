@@ -1,0 +1,17 @@
+{
+    "name": "pharynx-e2e/plugin",
+    "description": "Plugin built by CI to check that pharynx bundles Composer dependencies",
+    "license": "Apache-2.0",
+    "autoload": {
+        "psr-4": {
+            "PharynxE2E\\Plugin\\": "src/PharynxE2E/Plugin"
+        }
+    },
+    "require": {
+        "brick/math": "^0.12",
+        "dktapps/pmforms": "^2.1",
+        "doctrine/inflector": "^2.0",
+        "pocketmine/pocketmine-mp": "^5.0.0",
+        "webmozart/assert": "^1.11"
+    }
+}

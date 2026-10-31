@@ -133,8 +133,8 @@ $phar = new Phar("pharynx.phar");
 $phar->setStub(<<<'EOF'
     #!/usr/bin/env php
     <?php
-    if (PHP_MAJOR_VERSION < 8) {
-        echo "PHP 8.0 or above is required dueo to lexer changes\n";
+    if (PHP_VERSION_ID < 80100) {
+        echo "PHP 8.1 or above is required\n";
         exit(1);
     }
     require "phar://" . __FILE__ . "/vendor/autoload.php";

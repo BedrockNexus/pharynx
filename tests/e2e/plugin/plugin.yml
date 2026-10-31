@@ -1,0 +1,4 @@
+name: PharynxE2E
+main: PharynxE2E\Plugin\Main
+version: 1.0.0
+api: 5.0.0

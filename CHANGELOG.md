@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.1-bedrocknexus.1
+
+### Changes
+
+- Update the bundled Composer from 2.5.8 to 2.11.1 (Symfony 6.4 LTS), which
+  supports PHP 8.4 and 8.5
+- Require PHP 8.1 or newer, the same as PocketMine-MP 5
+- CI builds and loads a test plugin with Composer dependencies on PHP 8.1 to 8.5
+
 ## 0.4.0-bedrocknexus.1
 
 ### Features
