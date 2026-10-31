@@ -2,53 +2,26 @@ name: CI
 on:
   - push
   - pull_request
+
+permissions:
+  contents: read
+
 jobs:
-  phpstan:
-    name: phpstan analyze
-    runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        php-version:
-          - "8.2"
+  check:
+    name: phpstan, unit tests and code style
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: pmmp/setup-php-action@main
+      - uses: actions/checkout@v4
+      - uses: pmmp/setup-php-action@3.2.0
         with:
-          php-version: ${{matrix.php-version}}
+          php-version: "8.2"
           install-path: "./dev/bin"
-      - run: curl https://getcomposer.org/installer | php
+      - run: composer install --no-interaction --no-progress
       - name: phpstan analyze
-        run: composer lint
-  test:
-    name: unit tests
-    needs: [phpstan]
-    runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        php-version:
-          - "8.2"
-    steps:
-      - uses: actions/checkout@v2
-      - uses: pmmp/setup-php-action@main
-        with:
-          php-version: ${{matrix.php-version}}
-          install-path: "./dev/bin"
-      - run: curl https://getcomposer.org/installer | php
-      - name: run unit tests
-        run: composer test
-  fmt:
-    name: code style check
-    needs: [phpstan]
-    runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        php-version:
-          - "8.2"
-    steps:
-      - uses: actions/checkout@v2
-      - uses: pmmp/setup-php-action@main
-        with:
-          php-version: ${{matrix.php-version}}
-          install-path: "./dev/bin"
-      - run: curl https://getcomposer.org/installer | php
-      - run: composer install && php vendor/bin/php-cs-fixer fix --dry-run --diff
+        run: vendor/bin/phpstan analyze --no-progress
+      - name: unit tests
+        run: vendor/bin/phpunit tests
+      - name: code style check
+        run: vendor/bin/php-cs-fixer fix --dry-run --diff
+      - name: build phar
+        run: php -dphar.readonly=0 build.php

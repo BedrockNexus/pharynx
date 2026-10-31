@@ -4,37 +4,27 @@ on:
   push:
     tags: "*"
 
+permissions:
+  contents: write
+
 jobs:
   draft:
     name: Create GitHub draft release
-    runs-on: ubuntu-20.04
-    strategy:
-      fail-fast: false
-      matrix:
-        php-version:
-          - "8.2"
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: pmmp/setup-php-action@main
+      - uses: actions/checkout@v4
+      - uses: pmmp/setup-php-action@3.2.0
         with:
-          php-version: ${{matrix.php-version}}
+          php-version: "8.2"
           install-path: "./dev/bin"
-      - run: curl https://getcomposer.org/installer | php
       - name: Build artifact
-        run: composer build
-      - name: Compute tag
-        id: compute-tag
-        run: |
-          tag=$(echo ${{github.ref}} | cut -d/ -f3)
-          echo ::set-output name=TAG::$tag
-          echo ::set-output name=BODY::$(git tag -l --format='%(contents)' $tag)
+        run: php -dphar.readonly=0 build.php
+      - name: Record checksum
+        run: sha256sum pharynx.phar > pharynx.phar.sha256
       - name: Create draft release
-        uses: ncipollo/release-action@v1.10.0
-        with:
-          artifacts: ${{ github.workspace }}/pharynx.phar,plugin-dev/*
-          commit: ${{ github.sha }}
-          draft: true
-          name: Version ${{ steps.compute-tag.outputs.TAG }}
-          tag: ${{ steps.compute-tag.outputs.TAG }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          body: ${{ steps.compute-tag.outputs.BODY }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" pharynx.phar pharynx.phar.sha256 plugin-dev/* \
+            --draft --title "Version $TAG" --notes "$(git tag -l --format='%(contents)' "$TAG")"
