@@ -16,18 +16,22 @@ use function chdir;
 use function count;
 use function getcwd;
 use function getopt;
+use function in_array;
 use function is_array;
 use function is_dir;
 use function is_file;
+use function is_string;
 use function json_decode;
 use function json_last_error;
 use function json_last_error_msg;
 use function preg_match;
 use function random_bytes;
+use function realpath;
 use function rtrim;
 use function strlen;
 use function strpos;
 use function strrpos;
+use function strtolower;
 use function substr;
 use function substr_count;
 use function version_compare;
@@ -317,7 +321,16 @@ final class Args {
             }
             $depDedup[$depName] = true;
 
-            $this->inferComposerArgs($vendorPath, "$vendorPath/$depName", $depName, $depDedup, $epitope);
+            $installed = self::findInstalledPackage($vendorPath, $depName);
+            if ($installed === null) {
+                throw Terminal::fatal("Cannot find dependency $depName in $vendorPath, referenced from $path/composer.json. Run `composer install` first.");
+            }
+            [$installedName, $installedPath] = $installed;
+            if ($installedName !== $depName) {
+                Terminal::print("Info: using $installedName for $depName, which it replaces or provides", $this->verbose);
+            }
+
+            $this->inferComposerArgs($vendorPath, $installedPath, $installedName, $depDedup, $epitope);
         }
 
         if (isset($cj["extra"]["virion"])) {
@@ -350,6 +363,61 @@ final class Args {
         } elseif ($name !== null) { // not root
             Terminal::print("Warning: dependency {$name} does not declare a namespace root, please consider declaring it in parent libraries", true);
         }
+    }
+
+    /**
+     * Finds the installed package that satisfies a dependency.
+     *
+     * A package is usually installed at vendor/<name>, but forks such as
+     * axolotl-pm/pocketmine-mp are installed under their own name and declare
+     * that they replace or provide the original, so Composer's list of
+     * installed packages is consulted when that directory is missing.
+     *
+     * @return array{string, string}|null the installed package name and its directory
+     */
+    public static function findInstalledPackage(string $vendorPath, string $depName) : ?array {
+        if (is_file("$vendorPath/$depName/composer.json")) {
+            return [$depName, "$vendorPath/$depName"];
+        }
+
+        $installedJson = "$vendorPath/composer/installed.json";
+        if (!is_file($installedJson)) {
+            return null;
+        }
+        $installed = json_decode(Files::read($installedJson), true);
+        // Composer 2 wraps the list in "packages"; Composer 1 writes a bare list.
+        $packages = is_array($installed) ? ($installed["packages"] ?? $installed) : null;
+        if (!is_array($packages)) {
+            return null;
+        }
+
+        $wanted = strtolower($depName);
+        foreach ($packages as $package) {
+            if (!is_array($package) || !isset($package["name"]) || !is_string($package["name"])) {
+                continue;
+            }
+
+            $satisfies = [];
+            foreach (["replace", "provide"] as $link) {
+                if (isset($package[$link]) && is_array($package[$link])) {
+                    foreach ($package[$link] as $linkedName => $_) {
+                        $satisfies[] = strtolower((string) $linkedName);
+                    }
+                }
+            }
+            if (!in_array($wanted, $satisfies, true)) {
+                continue;
+            }
+
+            $packagePath = isset($package["install-path"]) && is_string($package["install-path"])
+                ? "$vendorPath/composer/" . $package["install-path"]
+                : "$vendorPath/" . $package["name"];
+            if (is_file("$packagePath/composer.json")) {
+                return [$package["name"], realpath($packagePath) ?: $packagePath];
+            }
+        }
+
+        return null;
     }
 
     private static function isPlatformPackage(string $depName) : bool {

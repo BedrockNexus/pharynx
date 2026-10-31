@@ -1,0 +1,23 @@
+{
+    "packages": [
+        {
+            "name": "axolotl-pm/pocketmine-mp",
+            "replace": {
+                "pocketmine/pocketmine-mp": "*"
+            },
+            "install-path": "../axolotl-pm/pocketmine-mp"
+        },
+        {
+            "name": "dktapps/pmforms",
+            "install-path": "../dktapps/pmforms"
+        },
+        {
+            "name": "example/logger",
+            "provide": {
+                "psr/log-implementation": "3.0.0"
+            },
+            "install-path": "../example/logger"
+        }
+    ],
+    "dev": true
+}
